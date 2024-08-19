@@ -1,9 +1,9 @@
 import ReactDom from "react-dom";
 
-const Portal = ({ child }: { child: JSX.Element }) => {
+const Portal = ({ children }: { children: JSX.Element }) => {
   const el = document.getElementById("modal");
 
-  return ReactDom.createPortal(child, el!);
+  return ReactDom.createPortal(children, el!);
 };
 
 export default Portal;

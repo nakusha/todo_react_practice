@@ -6,7 +6,7 @@ import Test from "./test";
 type Props = {
   getTodoListByDate: () => void;
   toggleCalendar: () => void;
-  selectedDate: any;
+  selectedDate: Date;
 };
 
 const DaySelector = ({

@@ -78,7 +78,7 @@ function App() {
         <DaySelector
           getTodoListByDate={getTodoListByDate}
           toggleCalendar={toggleCalendar}
-          selectedDate={selectedDate}
+          selectedDate={selectedDate as Date}
         />
 
         <AddTodoView>
@@ -130,8 +130,10 @@ function App() {
             <CalendarView>
               <Calendar
                 onChange={(value) => {
-                  setSelectedDate(value);
-                  setShowCalendar(false);
+                  if (typeof value === "object") {
+                    setSelectedDate(value);
+                    setShowCalendar(false);
+                  }
                 }}
                 value={selectedDate}
               />
