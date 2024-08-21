@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ListItem from "./ListItem";
 import styled from "styled-components";
 import searchIcon from "./assets/search_outline.png";
@@ -10,6 +10,7 @@ import Modal from "./Modal";
 import "react-calendar/dist/Calendar.css";
 import "./calendar.style.css";
 import TodoAPI, { AddTodoItem, TodoItem } from "./api/Todo";
+import dayjs from "dayjs";
 
 export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
@@ -22,7 +23,13 @@ function App() {
   const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
 
+  useEffect(() => {
+    getTodoListByDate();
+  }, [selectedDate]);
+
   const addTodo = () => {
+    if (input.length === 0) return;
+
     const todo: AddTodoItem = {
       content: input,
       user_id: 3,
@@ -31,7 +38,8 @@ function App() {
 
     TodoAPI.addTodo(todo)
       .then((resp) => {
-        setList((prevList) => [resp, ...prevList]);
+        getTodoListByDate();
+        // setList((prevList) => [resp, ...prevList]);
       })
       .catch((e) => console.log(e));
     setInput("");
@@ -49,26 +57,28 @@ function App() {
   };
   const modifyListItem = (modifyItem: TodoItem) => {
     TodoAPI.modifyTodo(modifyItem).then(() => {
-      setList(
-        list.map((item) => {
-          if (item.id === modifyItem.id) {
-            console.log("skjfhskjhd", modifyItem);
-            item = modifyItem;
-          }
-          return item;
-        })
-      );
+      getTodoListByDate();
+      // setList(
+      //   list.map((item) => {
+      //     if (item.id === modifyItem.id) {
+      //       console.log("skjfhskjhd", modifyItem);
+      //       item = modifyItem;
+      //     }
+      //     return item;
+      //   })
+      // );
     });
   };
   const deleteListItem = (id: number) => {
     TodoAPI.deleteTodo(id).then(() => {
-      setList(list.filter((item) => item.id !== id));
+      getTodoListByDate();
+      // setList(list.filter((item) => item.id !== id));
     });
   };
 
   const toggleSearchMode = () => {
     if (isSearch) {
-      setSearchList([]);
+      getTodoListByDate();
     }
     setIsSearch(!isSearch);
     setInput("");
@@ -76,31 +86,38 @@ function App() {
 
   const searchListbyKeyword = () => {
     TodoAPI.searchTodos(input).then((resp) => {
-      setSearchList(resp);
+      setList(resp);
     });
     // const result = list.filter((item) => item.content.includes(input));
     // setSearchList(result);
   };
 
-  const getTodoListByDate = (date: string) => {
-    TodoAPI.getTodos(3, date).then((resp) => {
-      setList(resp);
-    });
+  const getTodoListByDate = () => {
+    TodoAPI.getTodos(3, dayjs(selectedDate as Date).format("YYYY-MM-DD")).then(
+      (resp) => {
+        setList(resp);
+      }
+    );
   };
 
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar);
   };
 
+  const changeSelectedDate = (date: Date) => {
+    setSelectedDate(date);
+  };
   return (
     <>
       <Container>
-        {!isSearch && (
+        {!isSearch ? (
           <DaySelector
-            getTodoListByDate={getTodoListByDate}
+            changeSelectedDate={changeSelectedDate}
             toggleCalendar={toggleCalendar}
             selectedDate={selectedDate as Date}
           />
+        ) : (
+          <div style={{ height: 60 }}></div>
         )}
 
         <AddTodoView>
@@ -124,25 +141,15 @@ function App() {
             <Button onClick={addTodo}>추가</Button>
           )}
         </AddTodoView>
-        {searchList.length === 0
-          ? list.map((item) => (
-              <ListItem
-                key={item.id}
-                item={item}
-                deleteListItem={deleteListItem}
-                modifyListItem={modifyContent}
-                completeTodo={completeTodo}
-              />
-            ))
-          : searchList.map((item) => (
-              <ListItem
-                key={item.id}
-                item={item}
-                deleteListItem={deleteListItem}
-                modifyListItem={modifyContent}
-                completeTodo={completeTodo}
-              />
-            ))}
+        {list.map((item) => (
+          <ListItem
+            key={item.id}
+            item={item}
+            deleteListItem={deleteListItem}
+            modifyListItem={modifyContent}
+            completeTodo={completeTodo}
+          />
+        ))}
       </Container>
       {showCalendar && (
         <Portal>

@@ -1,17 +1,16 @@
 import dayjs from "dayjs";
 import { useEffect, useState } from "react";
 import styled from "styled-components";
-import Test from "./test";
 
 type Props = {
-  getTodoListByDate: (date: string) => void;
+  changeSelectedDate: (date: Date) => void;
   toggleCalendar: () => void;
   selectedDate: Date;
 };
 
 const DaySelector = ({
   selectedDate,
-  getTodoListByDate,
+  changeSelectedDate,
   toggleCalendar,
 }: Props) => {
   const [date, setDate] = useState(dayjs());
@@ -20,16 +19,15 @@ const DaySelector = ({
     setDate(dayjs(selectedDate));
   }, [selectedDate]);
 
-  useEffect(() => {
-    getTodoListByDate(date.format("YYYY-MM-DD"));
-  }, [date]);
-
   const onChangeDate = (isPrev: boolean) => {
+    let resultDate;
     if (isPrev) {
-      setDate(date.add(-1, "days"));
+      resultDate = date.add(-1, "days");
     } else {
-      setDate(date.add(1, "days"));
+      resultDate = date.add(1, "days");
     }
+    changeSelectedDate(resultDate.toDate());
+    setDate(resultDate);
   };
 
   return (
