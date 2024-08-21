@@ -6,12 +6,18 @@ import { TodoItem } from "./api/Todo";
 type Props = {
   item: TodoItem;
   deleteListItem: (id: number) => void;
-  modifyListItem: (id: TodoItem, content: string) => void;
+  modifyListItem: (item: TodoItem, content: string) => void;
+  completeTodo: (item: TodoItem, isComplete: boolean) => void;
 };
 
-const ListItem = ({ item, deleteListItem, modifyListItem }: Props) => {
+const ListItem = ({
+  item,
+  deleteListItem,
+  modifyListItem,
+  completeTodo,
+}: Props) => {
   const [isModify, setIsModify] = useState(false);
-  const [isDone, setIsDone] = useState(false);
+
   const [input, setInput] = useState(item.content);
 
   const toggleModifyMode = () => {
@@ -24,20 +30,21 @@ const ListItem = ({ item, deleteListItem, modifyListItem }: Props) => {
   const onCompleteTodo = () => {
     if (isModify) {
     } else {
-      setIsDone(!isDone);
+      completeTodo(item, !item.completed);
     }
   };
   return (
     <S.Container>
       <S.LeftView onClick={onCompleteTodo}>
-        <input type="checkbox" checked={isDone} readOnly />
+        <input type="checkbox" checked={item.completed} readOnly />
         <S.ModifyInput
           value={input}
           disabled={!isModify}
+          checked={item.completed}
           onChange={(e) => setInput(e.target.value)}
         />
       </S.LeftView>
-      {!isDone && (
+      {!item.completed && (
         <S.ButtonContainer>
           <p>{dayjs(item.date).format("YYYY.MM.DD")}</p>
           <button onClick={toggleModifyMode}>

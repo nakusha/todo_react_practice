@@ -37,12 +37,23 @@ function App() {
     setInput("");
   };
 
-  const modifyListItem = (modifyItem: TodoItem, content: string) => {
-    TodoAPI.modifyTodo({ ...modifyItem, content }).then(() => {
+  const modifyContent = (item: TodoItem, content: string) => {
+    item.content = content;
+    modifyListItem(item);
+  };
+
+  const completeTodo = (item: TodoItem, isComplete: boolean) => {
+    item.completed = isComplete;
+    console.log(item);
+    modifyListItem(item);
+  };
+  const modifyListItem = (modifyItem: TodoItem) => {
+    TodoAPI.modifyTodo(modifyItem).then(() => {
       setList(
         list.map((item) => {
           if (item.id === modifyItem.id) {
-            item.content = content;
+            console.log("skjfhskjhd", modifyItem);
+            item = modifyItem;
           }
           return item;
         })
@@ -119,7 +130,8 @@ function App() {
                 key={item.id}
                 item={item}
                 deleteListItem={deleteListItem}
-                modifyListItem={modifyListItem}
+                modifyListItem={modifyContent}
+                completeTodo={completeTodo}
               />
             ))
           : searchList.map((item) => (
@@ -127,7 +139,8 @@ function App() {
                 key={item.id}
                 item={item}
                 deleteListItem={deleteListItem}
-                modifyListItem={modifyListItem}
+                modifyListItem={modifyContent}
+                completeTodo={completeTodo}
               />
             ))}
       </Container>

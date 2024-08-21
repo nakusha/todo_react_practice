@@ -17,7 +17,10 @@ export const LeftView = styled.div`
   display: flex;
   flex: 1;
 `;
-export const ModifyInput = styled.input<{ disabled: boolean }>`
+export const ModifyInput = styled.input<{
+  disabled: boolean;
+  checked: boolean;
+}>`
   flex: 1;
   display: flex;
   border: none;
@@ -34,6 +37,12 @@ export const ModifyInput = styled.input<{ disabled: boolean }>`
     css`
       border: 1px solid #ffffff;
       background: #ffffff;
+    `}
+  ${({ checked }) =>
+    checked &&
+    css`
+      color: #cccccc;
+      text-decoration: line-through;
     `}
 `;
 export const TextWrap = styled.p<{ $isDone: boolean }>`
