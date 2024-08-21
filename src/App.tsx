@@ -9,48 +9,50 @@ import Modal from "./Modal";
 
 import "react-calendar/dist/Calendar.css";
 import "./calendar.style.css";
-
-export type ListItemType = {
-  content: string;
-  id: number;
-};
+import TodoAPI, { AddTodoItem, TodoItem } from "./api/Todo";
 
 export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
 
 function App() {
-  const [list, setList] = useState<ListItemType[]>([]);
-  const [searchList, setSearchList] = useState<ListItemType[]>([]);
+  const [list, setList] = useState<TodoItem[]>([]);
+  const [searchList, setSearchList] = useState<TodoItem[]>([]);
   const [input, setInput] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const count = useRef(0);
-
   const addTodo = () => {
-    const todo = {
-      id: count.current,
+    const todo: AddTodoItem = {
       content: input,
+      user_id: 3,
+      date: selectedDate as Date,
     };
-    count.current++;
 
+    TodoAPI.addTodo(todo)
+      .then((resp) => {
+        setList((prevList) => [resp, ...prevList]);
+      })
+      .catch((e) => console.log(e));
     setInput("");
-    setList((prev) => [todo, ...prev]);
   };
 
-  const modifyListItem = (id: number, content: string) => {
-    setList(
-      list.map((item) => {
-        if (item.id === id) {
-          item.content = content;
-        }
-        return item;
-      })
-    );
+  const modifyListItem = (modifyItem: TodoItem, content: string) => {
+    TodoAPI.modifyTodo({ ...modifyItem, content }).then(() => {
+      setList(
+        list.map((item) => {
+          if (item.id === modifyItem.id) {
+            item.content = content;
+          }
+          return item;
+        })
+      );
+    });
   };
   const deleteListItem = (id: number) => {
-    setList(list.filter((item) => item.id !== id));
+    TodoAPI.deleteTodo(id).then(() => {
+      setList(list.filter((item) => item.id !== id));
+    });
   };
 
   const toggleSearchMode = () => {
@@ -62,11 +64,18 @@ function App() {
   };
 
   const searchListbyKeyword = () => {
-    const result = list.filter((item) => item.content.includes(input));
-    setSearchList(result);
+    TodoAPI.searchTodos(input).then((resp) => {
+      setSearchList(resp);
+    });
+    // const result = list.filter((item) => item.content.includes(input));
+    // setSearchList(result);
   };
 
-  const getTodoListByDate = () => {};
+  const getTodoListByDate = (date: string) => {
+    TodoAPI.getTodos(3, date).then((resp) => {
+      setList(resp);
+    });
+  };
 
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar);
@@ -75,11 +84,13 @@ function App() {
   return (
     <>
       <Container>
-        <DaySelector
-          getTodoListByDate={getTodoListByDate}
-          toggleCalendar={toggleCalendar}
-          selectedDate={selectedDate as Date}
-        />
+        {!isSearch && (
+          <DaySelector
+            getTodoListByDate={getTodoListByDate}
+            toggleCalendar={toggleCalendar}
+            selectedDate={selectedDate as Date}
+          />
+        )}
 
         <AddTodoView>
           <SearchButton onClick={toggleSearchMode}>
@@ -133,6 +144,7 @@ function App() {
                   if (typeof value === "object") {
                     setSelectedDate(value);
                     setShowCalendar(false);
+                    setIsSearch(false);
                   }
                 }}
                 value={selectedDate}

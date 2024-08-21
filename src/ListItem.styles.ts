@@ -53,6 +53,11 @@ export const TextWrap = styled.p<{ $isDone: boolean }>`
 export const ButtonContainer = styled.div`
   display: flex;
   flex-direction: row;
+  align-items: center;
+  p {
+    color: #aaaaaa;
+    padding: 4px;
+  }
   button {
     border-radius: 5px;
     height: 30px;

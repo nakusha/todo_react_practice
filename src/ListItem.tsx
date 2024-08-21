@@ -1,11 +1,12 @@
-import { ListItemType } from "./App";
 import { useState } from "react";
 import * as S from "./ListItem.styles";
+import dayjs from "dayjs";
+import { TodoItem } from "./api/Todo";
 
 type Props = {
-  item: ListItemType;
+  item: TodoItem;
   deleteListItem: (id: number) => void;
-  modifyListItem: (id: number, content: string) => void;
+  modifyListItem: (id: TodoItem, content: string) => void;
 };
 
 const ListItem = ({ item, deleteListItem, modifyListItem }: Props) => {
@@ -15,7 +16,7 @@ const ListItem = ({ item, deleteListItem, modifyListItem }: Props) => {
 
   const toggleModifyMode = () => {
     if (isModify) {
-      modifyListItem(item.id, input);
+      modifyListItem(item, input);
     }
     setIsModify(!isModify);
   };
@@ -38,6 +39,7 @@ const ListItem = ({ item, deleteListItem, modifyListItem }: Props) => {
       </S.LeftView>
       {!isDone && (
         <S.ButtonContainer>
+          <p>{dayjs(item.date).format("YYYY.MM.DD")}</p>
           <button onClick={toggleModifyMode}>
             {isModify ? "완료" : "수정"}
           </button>
