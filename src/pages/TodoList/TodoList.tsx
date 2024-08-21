@@ -11,6 +11,7 @@ import "react-calendar/dist/Calendar.css";
 import "./calendar.style.css";
 import TodoAPI, { AddTodoItem, TodoItem } from "../../api/Todo";
 import dayjs from "dayjs";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
@@ -22,9 +23,58 @@ const TodoList = () => {
   const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date());
   const [showCalendar, setShowCalendar] = useState(false);
 
-  useEffect(() => {
-    getTodoListByDate();
-  }, [selectedDate]);
+  const queryClient = useQueryClient();
+
+  const { data } = useQuery({
+    queryKey: ["getTodo", selectedDate, isSearch, input],
+    queryFn: () => {
+      if (isSearch) {
+        if (input.length === 0) {
+          return TodoAPI.getTodos(
+            3,
+            dayjs(selectedDate as Date).format("YYYY-MM-DD")
+          );
+        } else {
+          return TodoAPI.searchTodos(input);
+        }
+      } else {
+        return TodoAPI.getTodos(
+          3,
+          dayjs(selectedDate as Date).format("YYYY-MM-DD")
+        );
+      }
+    },
+  });
+
+  const addTodoMutaion = useMutation({
+    mutationFn: (todo: AddTodoItem) => TodoAPI.addTodo(todo),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({
+        queryKey: ["getTodo", selectedDate, isSearch, input],
+      });
+    },
+  });
+
+  const modifyTodoMutaion = useMutation({
+    mutationFn: (todo: TodoItem) => TodoAPI.modifyTodo(todo),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({
+        queryKey: ["getTodo", selectedDate, isSearch, input],
+      });
+    },
+  });
+
+  const deleteTodoMutaion = useMutation({
+    mutationFn: (todoId: number) => TodoAPI.deleteTodo(todoId),
+    onSuccess: () => {
+      // Invalidate and refetch
+      queryClient.invalidateQueries({
+        queryKey: ["getTodo", selectedDate, isSearch, input],
+      });
+    },
+  });
 
   const addTodo = () => {
     if (input.length === 0) return;
@@ -34,13 +84,8 @@ const TodoList = () => {
       user_id: 3,
       date: selectedDate as Date,
     };
+    addTodoMutaion.mutate(todo);
 
-    TodoAPI.addTodo(todo)
-      .then((resp) => {
-        getTodoListByDate();
-        // setList((prevList) => [resp, ...prevList]);
-      })
-      .catch((e) => console.log(e));
     setInput("");
   };
 
@@ -51,52 +96,19 @@ const TodoList = () => {
 
   const completeTodo = (item: TodoItem, isComplete: boolean) => {
     item.completed = isComplete;
-    console.log(item);
     modifyListItem(item);
   };
+
   const modifyListItem = (modifyItem: TodoItem) => {
-    TodoAPI.modifyTodo(modifyItem).then(() => {
-      getTodoListByDate();
-      // setList(
-      //   list.map((item) => {
-      //     if (item.id === modifyItem.id) {
-      //       console.log("skjfhskjhd", modifyItem);
-      //       item = modifyItem;
-      //     }
-      //     return item;
-      //   })
-      // );
-    });
+    modifyTodoMutaion.mutate(modifyItem);
   };
   const deleteListItem = (id: number) => {
-    TodoAPI.deleteTodo(id).then(() => {
-      getTodoListByDate();
-      // setList(list.filter((item) => item.id !== id));
-    });
+    deleteTodoMutaion.mutate(id);
   };
 
   const toggleSearchMode = () => {
-    if (isSearch) {
-      getTodoListByDate();
-    }
     setIsSearch(!isSearch);
     setInput("");
-  };
-
-  const searchListbyKeyword = () => {
-    TodoAPI.searchTodos(input).then((resp) => {
-      setList(resp);
-    });
-    // const result = list.filter((item) => item.content.includes(input));
-    // setSearchList(result);
-  };
-
-  const getTodoListByDate = () => {
-    TodoAPI.getTodos(3, dayjs(selectedDate as Date).format("YYYY-MM-DD")).then(
-      (resp) => {
-        setList(resp);
-      }
-    );
   };
 
   const toggleCalendar = () => {
@@ -106,41 +118,24 @@ const TodoList = () => {
   const changeSelectedDate = (date: Date) => {
     setSelectedDate(date);
   };
+
   return (
     <>
       <Container>
-        {!isSearch ? (
-          <DaySelector
-            changeSelectedDate={changeSelectedDate}
-            toggleCalendar={toggleCalendar}
-            selectedDate={selectedDate as Date}
-          />
-        ) : (
-          <div style={{ height: 60 }}></div>
-        )}
+        <DaySelector
+          changeSelectedDate={changeSelectedDate}
+          toggleCalendar={toggleCalendar}
+          selectedDate={selectedDate as Date}
+        />
 
         <AddTodoView>
           <SearchButton onClick={toggleSearchMode}>
             <SearchIcon src={searchIcon} />
           </SearchButton>
-          <Input
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyUp={(e) => {
-              if (isSearch) {
-                if (e.key === "Enter") {
-                  searchListbyKeyword();
-                }
-              }
-            }}
-          />
-          {isSearch ? (
-            <Button onClick={searchListbyKeyword}>검색</Button>
-          ) : (
-            <Button onClick={addTodo}>추가</Button>
-          )}
+          <Input value={input} onChange={(e) => setInput(e.target.value)} />
+          {isSearch ? <></> : <Button onClick={addTodo}>추가</Button>}
         </AddTodoView>
-        {list.map((item) => (
+        {data?.map((item) => (
           <ListItem
             key={item.id}
             item={item}
