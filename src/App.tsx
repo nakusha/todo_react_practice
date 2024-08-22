@@ -6,7 +6,7 @@ const queryClient = new QueryClient();
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      x<TodoList />
+      <TodoList />
     </QueryClientProvider>
   );
 }

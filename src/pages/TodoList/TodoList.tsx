@@ -17,7 +17,6 @@ export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
 
 const TodoList = () => {
-  const [list, setList] = useState<TodoItem[]>([]);
   const [input, setInput] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date());
@@ -26,24 +25,21 @@ const TodoList = () => {
   const queryClient = useQueryClient();
 
   const { data } = useQuery({
-    queryKey: ["getTodo", selectedDate, isSearch, input],
+    queryKey: ["getTodo", selectedDate],
     queryFn: () => {
-      if (isSearch) {
-        if (input.length === 0) {
-          return TodoAPI.getTodos(
-            3,
-            dayjs(selectedDate as Date).format("YYYY-MM-DD")
-          );
-        } else {
-          return TodoAPI.searchTodos(input);
-        }
-      } else {
-        return TodoAPI.getTodos(
-          3,
-          dayjs(selectedDate as Date).format("YYYY-MM-DD")
-        );
-      }
+      return TodoAPI.getTodos(
+        3,
+        dayjs(selectedDate as Date).format("YYYY-MM-DD")
+      );
     },
+  });
+
+  const { data: searchData } = useQuery({
+    queryKey: ["getTodo", input],
+    queryFn: () => {
+      return TodoAPI.searchTodos(input);
+    },
+    enabled: isSearch && input.length > 0,
   });
 
   const addTodoMutaion = useMutation({
@@ -51,7 +47,7 @@ const TodoList = () => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({
-        queryKey: ["getTodo", selectedDate, isSearch, input],
+        queryKey: ["getTodo", selectedDate],
       });
     },
   });
@@ -61,7 +57,7 @@ const TodoList = () => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({
-        queryKey: ["getTodo", selectedDate, isSearch, input],
+        queryKey: ["getTodo", selectedDate],
       });
     },
   });
@@ -71,7 +67,7 @@ const TodoList = () => {
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({
-        queryKey: ["getTodo", selectedDate, isSearch, input],
+        queryKey: ["getTodo", selectedDate],
       });
     },
   });
@@ -100,6 +96,7 @@ const TodoList = () => {
   };
 
   const modifyListItem = (modifyItem: TodoItem) => {
+    console.log(modifyItem);
     modifyTodoMutaion.mutate(modifyItem);
   };
   const deleteListItem = (id: number) => {
@@ -119,6 +116,8 @@ const TodoList = () => {
     setSelectedDate(date);
   };
 
+  const displayData = isSearch ? searchData : data;
+
   return (
     <>
       <Container>
@@ -135,7 +134,7 @@ const TodoList = () => {
           <Input value={input} onChange={(e) => setInput(e.target.value)} />
           {isSearch ? <></> : <Button onClick={addTodo}>추가</Button>}
         </AddTodoView>
-        {data?.map((item) => (
+        {displayData?.map((item) => (
           <ListItem
             key={item.id}
             item={item}
