@@ -35,7 +35,7 @@ const TodoList = () => {
   });
 
   const { data: searchData } = useQuery({
-    queryKey: ["getTodo", input],
+    queryKey: ["searchTodo", input],
     queryFn: () => {
       return TodoAPI.searchTodos(input);
     },

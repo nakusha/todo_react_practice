@@ -6,18 +6,11 @@
   ],
   "compilerOptions": {
     // absolute path
-    "baseUrl": "src",
+    "baseUrl": "./src",
     "paths": {
-      "@*": ["*"],
-      "@api": ["api/*"],
-      "@components/*": ["components/*"],
-      "@layouts/*": ["layouts/*"],
-      "@pages/*": ["pages/*"],
-      "@resources/*": ["resources/*"],
-      "@router/*": ["router/*"],
-      "@styles/*": ["styles/*"],
-      "@utils/*": ["utils/*"],
-      "@stores/*": ["stores/*"]
+      "@*": ["/*"],
+      "@api/*": ["api/*"],
+      "@pages/*": ["pages/*"]
     }
   }
 }
