@@ -1,12 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import * as S from "./Login.style";
+import { useCookies } from "react-cookie";
+
 const Login = () => {
+  const [userCookie, setUserCookie, removeUserCookie] = useCookies(["user"]);
   const navigate = useNavigate();
+
+  const handleSetCookie = (userId: string) => {
+    setUserCookie("user", userId, { path: "/todo" });
+  };
+
   const onClickSignUp = () => {
     navigate("/join");
   };
 
   const onClickSignIn = () => {
+    handleSetCookie("userId");
     navigate("/todo");
   };
   return (

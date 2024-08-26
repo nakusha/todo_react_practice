@@ -60,6 +60,7 @@ const Join = () => {
         <S.RowLeftItem>비밀번호</S.RowLeftItem>
         <S.RowRightItem>
           <input
+            type="password"
             {...register("password", { required: "비밀번호를 입력해주세요" })}
           />
         </S.RowRightItem>
