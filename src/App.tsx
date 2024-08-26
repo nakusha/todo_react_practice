@@ -12,9 +12,9 @@ function App() {
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
         <Routes>
+          <Route path="/" element={<Login />} />
+          <Route path="/join" element={<Join />} />
           <Route element={<Layout />}>
-            <Route path="/" element={<Login />} />
-            <Route path="/join" element={<Join />} />
             <Route path="/todo" element={<TodoList />} />
           </Route>
         </Routes>

@@ -1,53 +1,88 @@
 import { useNavigate } from "react-router-dom";
 import * as S from "./Join.style";
-import Postcode from "@actbase/react-daum-postcode";
+import PostCode, { Address } from "react-daum-postcode";
 import { useState } from "react";
 import Modal from "../../Modal";
 import Portal from "../../Portal";
-import { OnCompleteParams } from "@actbase/react-daum-postcode/lib/types";
+
+import { useForm, SubmitHandler } from "react-hook-form";
+
+export type Inputs = {
+  username: string;
+  userid: string;
+  password: string;
+  email: string;
+  address1: string;
+  address2: string;
+  zipcode: string;
+};
 const Join = () => {
   const [showPostSearch, setShowPostSearch] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<Inputs>();
+
   const navigate = useNavigate();
 
-  const onClickJoin = () => {
+  const onClickJoin: SubmitHandler<Inputs> = (data) => {
+    console.log(data);
     navigate("/");
   };
 
-  const getAddressData = (data: OnCompleteParams) => {
-    console.log(data.roadAddress, data.zonecode);
+  const getAddressData = (data: Address) => {
+    setValue("zipcode", data.zonecode.toString());
+    setValue("address1", data.roadAddress);
     setShowPostSearch(false);
   };
 
   return (
-    <S.JoinContainer onSubmit={onClickJoin}>
-      <S.RowItem>
+    <S.JoinContainer onSubmit={handleSubmit(onClickJoin)}>
+      <S.NoMBRowItem>
         <S.RowLeftItem>아이디</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input
+            {...register("userid", {
+              required: "아이디를 입력해주세요",
+              minLength: {
+                value: 3,
+                message: "아이디가 너무 짧습니다. 3자이상 입력해주세요",
+              },
+            })}
+          />
         </S.RowRightItem>
-      </S.RowItem>
-      <S.RowItem>
+      </S.NoMBRowItem>
+      <S.ErrorRow>{errors.userid?.message}</S.ErrorRow>
+      <S.NoMBRowItem>
         <S.RowLeftItem>비밀번호</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input
+            {...register("password", { required: "비밀번호를 입력해주세요" })}
+          />
         </S.RowRightItem>
-      </S.RowItem>
-      <S.RowItem>
+      </S.NoMBRowItem>
+      <S.ErrorRow>{errors.password?.message}</S.ErrorRow>
+      <S.NoMBRowItem>
         <S.RowLeftItem>이름</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input {...register("username")} />
         </S.RowRightItem>
-      </S.RowItem>
-      <S.RowItem>
+      </S.NoMBRowItem>
+      <S.ErrorRow>{errors.username?.message}</S.ErrorRow>
+      <S.NoMBRowItem>
         <S.RowLeftItem>이메일</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input {...register("email")} />
         </S.RowRightItem>
-      </S.RowItem>
+      </S.NoMBRowItem>
+      <S.ErrorRow>{errors.email?.message}</S.ErrorRow>
       <S.NoMBRowItem>
         <S.RowLeftItem>주소</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input {...register("zipcode")} />
           <button type="button" onClick={() => setShowPostSearch(true)}>
             주소검색
           </button>
@@ -56,29 +91,27 @@ const Join = () => {
       <S.NoMBRowItem>
         <S.RowLeftItem></S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input {...register("address1")} />
         </S.RowRightItem>
       </S.NoMBRowItem>
-      <S.RowItem>
+      <S.NoMBRowItem>
         <S.RowLeftItem></S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input {...register("address2")} />
         </S.RowRightItem>
-      </S.RowItem>
+      </S.NoMBRowItem>
+      <S.ErrorRow>
+        {errors.zipcode?.message ||
+          errors.address1?.message ||
+          errors.address2?.message}
+      </S.ErrorRow>
       <S.NoMBRowItem>
         <S.Button type="submit">회원가입</S.Button>
       </S.NoMBRowItem>
       {showPostSearch && (
         <Portal>
-          <Modal>
-            <Postcode
-              style={{ flex: 1, width: "100%", zIndex: 999 }}
-              jsOptions={{ animation: true }}
-              onSelected={(data) => getAddressData(data)}
-              onError={function (error: unknown): void {
-                throw new Error("Function not implemented.");
-              }}
-            />
+          <Modal onClickBackDrop={() => setShowPostSearch(false)}>
+            <PostCode onComplete={(data) => getAddressData(data)} />
           </Modal>
         </Portal>
       )}

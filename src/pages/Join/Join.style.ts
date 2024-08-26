@@ -25,15 +25,17 @@ export const NoMBRowItem = styled.div`
   gap: 10px;
 `;
 export const RowItem = styled(NoMBRowItem)`
-  height: 40px;
-  display: flex;
-  width: 100%;
-
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
   margin-bottom: 20px;
-  gap: 10px;
+  span {
+    color: red;
+  }
+`;
+
+export const ErrorRow = styled.div`
+  margin-bottom: 10px;
+  span {
+    color: red;
+  }
 `;
 
 export const RowLeftItem = styled.div`
