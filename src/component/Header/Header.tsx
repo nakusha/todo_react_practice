@@ -13,14 +13,19 @@ import dayjs from "dayjs";
 import DaySelector from "./features/DaySelector";
 import "react-calendar/dist/Calendar.css";
 import "./calendar.style.css";
+import styled from "styled-components";
+import { useNavigate } from "react-router-dom";
 
 const Header = () => {
-  const [userCookie] = useCookies([USER_COOKIE_KEY]);
+  const [userCookie, setUserCookie, removeUserCookie] = useCookies([
+    USER_COOKIE_KEY,
+  ]);
 
   const [showCalendar, setShowCalendar] = useState(false);
 
   const { selectedDate, selectedUser, setSelectedDate, setSelectedUser } =
     useTodoStore();
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (userCookie.user) {
@@ -66,6 +71,14 @@ const Header = () => {
         options={data || []}
         onChange={onChangeUser}
       />
+      <Button
+        onClick={() => {
+          removeUserCookie(USER_COOKIE_KEY);
+          navigate("/");
+        }}
+      >
+        로그아웃
+      </Button>
       {showCalendar && (
         <Portal>
           <Modal
@@ -91,4 +104,16 @@ const Header = () => {
   );
 };
 
+const Button = styled.button`
+  border-radius: 5px;
+  height: 40px;
+  width: 70px;
+  margin-left: 5px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 1px solid #3383fd;
+  background: #3383fd;
+  color: #ffffff;
+`;
 export default Header;
