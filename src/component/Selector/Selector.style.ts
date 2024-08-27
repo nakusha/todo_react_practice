@@ -1,4 +1,4 @@
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 export const SelectContainer = styled.div<{ width?: string }>`
   position: relative;
@@ -6,7 +6,7 @@ export const SelectContainer = styled.div<{ width?: string }>`
   width: ${({ width }) => width + "px" || "200px"};
 `;
 
-export const Selector = styled.div`
+export const Selector = styled.div<{ $selectedOption: any }>`
   border: 1px solid #ccc;
   padding: 10px;
   min-height: 40px;
@@ -15,6 +15,12 @@ export const Selector = styled.div`
   &:hover {
     background-color: #f8f8f8;
   }
+  ${({ $selectedOption }) =>
+    $selectedOption
+      ? css``
+      : css`
+          color: #ccc;
+        `}
 `;
 
 export const OptionContainer = styled.ul`

@@ -1,7 +1,10 @@
 import { useState } from "react";
+import { useCookies } from "react-cookie";
 import * as S from "./ListItem.styles";
 import dayjs from "dayjs";
 import { TodoItem } from "../../../api/Todo";
+import { USER_COOKIE_KEY } from "../../../constant/constants";
+import { useTodoStore } from "../../../stores/todoStore";
 
 type Props = {
   item: TodoItem;
@@ -17,8 +20,10 @@ const ListItem = ({
   completeTodo,
 }: Props) => {
   const [isModify, setIsModify] = useState(false);
-
   const [input, setInput] = useState(item.content);
+  const [userCookie] = useCookies([USER_COOKIE_KEY]);
+
+  const { selectedUser } = useTodoStore();
 
   const toggleModifyMode = () => {
     if (isModify) {
@@ -28,6 +33,7 @@ const ListItem = ({
   };
 
   const onCompleteTodo = () => {
+    if (userCookie.user !== selectedUser) return;
     if (isModify) {
     } else {
       completeTodo(item, !item.completed);
@@ -44,7 +50,7 @@ const ListItem = ({
           onChange={(e) => setInput(e.target.value)}
         />
       </S.LeftView>
-      {!item.completed && (
+      {!item.completed && userCookie.user === selectedUser && (
         <S.ButtonContainer>
           <p>{dayjs(item.date).format("YYYY.MM.DD")}</p>
           <button onClick={toggleModifyMode}>

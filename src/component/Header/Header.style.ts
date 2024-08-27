@@ -9,3 +9,9 @@ export const HeaderContainer = styled.div`
   height: 80px;
   width: 100%;
 `;
+
+export const CalendarView = styled.div`
+  padding: 10px;
+  border-radius: 10px;
+  background: #ffffff;
+`;

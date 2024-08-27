@@ -43,7 +43,7 @@ const Selector = <T,>({
 
   return (
     <S.SelectContainer onClick={openSelector}>
-      <S.Selector>
+      <S.Selector $selectedOption={selectedOption}>
         {selectedOption ? selectedOption.label : placeholder}
       </S.Selector>
       {isOpen ? (

@@ -46,11 +46,10 @@ const Container = styled.div`
   flex-direction: row;
   align-items: center;
   justify-content: space-between;
-  height: 50px;
+  height: 40px;
   flex: 1;
 
   padding: 0 20px;
-  margin-bottom: 10px;
 `;
 
 const ArrowButton = styled.button`
@@ -67,7 +66,7 @@ const DayTextWrap = styled.p`
   padding: 0px;
   display: flex;
   flex: 1;
-  margin: 0 20px;
+
   justify-content: center;
 `;
 export default DaySelector;

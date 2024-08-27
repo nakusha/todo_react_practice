@@ -1,19 +1,16 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import ListItem from "./features/ListItem";
 import styled from "styled-components";
 import searchIcon from "../../assets/search_outline.png";
-import DaySelector from "./features/DaySelector";
-import Calendar from "react-calendar";
-import Portal from "../../Portal";
-import Modal from "../../Modal";
-import { Cookies, useCookies } from "react-cookie";
-import "react-calendar/dist/Calendar.css";
-import "./calendar.style.css";
+
+import { useCookies } from "react-cookie";
+
 import TodoAPI, { AddTodoItem, TodoItem } from "../../api/Todo";
 import dayjs from "dayjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { USER_COOKIE_KEY } from "../../constant/constants";
 import { useNavigate } from "react-router-dom";
+import { useTodoStore } from "../../stores/todoStore";
 
 export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
@@ -22,11 +19,11 @@ const TodoList = () => {
   const [userCookie] = useCookies([USER_COOKIE_KEY]);
   const [input, setInput] = useState("");
   const [isSearch, setIsSearch] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date());
-  const [showCalendar, setShowCalendar] = useState(false);
 
+  const { selectedDate, selectedUser } = useTodoStore();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
+
   useEffect(() => {
     if (!userCookie.user) {
       navigate("/");
@@ -34,11 +31,11 @@ const TodoList = () => {
   }, []);
 
   const { data } = useQuery({
-    queryKey: ["getTodo", selectedDate],
+    queryKey: ["getTodo", selectedDate, selectedUser],
     queryFn: () => {
       return TodoAPI.getTodos(
-        userCookie.user,
-        dayjs(selectedDate as Date).format("YYYY-MM-DD")
+        selectedUser ? selectedUser.toString() : userCookie.user,
+        selectedDate
       );
     },
   });
@@ -48,8 +45,8 @@ const TodoList = () => {
     queryFn: () => {
       return TodoAPI.searchTodos(
         input,
-        userCookie.user,
-        dayjs(selectedDate as Date).format("YYYY-MM-DD")
+        selectedUser ? selectedUser.toString() : userCookie.user,
+        selectedDate
       );
     },
     enabled: isSearch && input.length > 0,
@@ -91,7 +88,7 @@ const TodoList = () => {
     const todo: AddTodoItem = {
       content: input,
       user_id: userCookie.user,
-      date: selectedDate as Date,
+      date: dayjs(selectedDate, "YYYY-MM-DD").toDate(),
     };
     addTodoMutaion.mutate(todo);
 
@@ -109,7 +106,6 @@ const TodoList = () => {
   };
 
   const modifyListItem = (modifyItem: TodoItem) => {
-    console.log(modifyItem);
     modifyTodoMutaion.mutate(modifyItem);
   };
   const deleteListItem = (id: number) => {
@@ -121,25 +117,11 @@ const TodoList = () => {
     setInput("");
   };
 
-  const toggleCalendar = () => {
-    setShowCalendar(!showCalendar);
-  };
-
-  const changeSelectedDate = (date: Date) => {
-    setSelectedDate(date);
-  };
-
   const displayData = isSearch ? searchData : data;
 
   return (
     <>
       <Container>
-        <DaySelector
-          changeSelectedDate={changeSelectedDate}
-          toggleCalendar={toggleCalendar}
-          selectedDate={selectedDate as Date}
-        />
-
         <AddTodoView>
           <SearchButton onClick={toggleSearchMode}>
             <SearchIcon src={searchIcon} />
@@ -157,28 +139,6 @@ const TodoList = () => {
           />
         ))}
       </Container>
-      {showCalendar && (
-        <Portal>
-          <Modal
-            type="bottom"
-            onClickBackDrop={() => setShowCalendar(false)}
-            backDropAnimation={false}
-          >
-            <CalendarView>
-              <Calendar
-                onChange={(value) => {
-                  if (typeof value === "object") {
-                    setSelectedDate(value);
-                    setShowCalendar(false);
-                    setIsSearch(false);
-                  }
-                }}
-                value={selectedDate}
-              />
-            </CalendarView>
-          </Modal>
-        </Portal>
-      )}
     </>
   );
 };
@@ -221,11 +181,6 @@ const Input = styled.input`
   outline: none;
 `;
 
-const CalendarView = styled.div`
-  padding: 10px;
-  border-radius: 10px;
-  background: #ffffff;
-`;
 const Button = styled.button`
   border-radius: 5px;
   height: 40px;
