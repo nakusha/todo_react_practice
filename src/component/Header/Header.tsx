@@ -31,7 +31,7 @@ const Header = () => {
 
   const { data } = useQuery({
     queryKey: ["getUsers"],
-    queryFn: AuthAPI.getUser,
+    queryFn: AuthAPI.getUsers,
     refetchOnWindowFocus: false,
     select: (data): { label: string; value: number }[] => {
       return data.map((item: UserInfo) => ({

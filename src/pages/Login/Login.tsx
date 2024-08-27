@@ -4,16 +4,22 @@ import { useCookies } from "react-cookie";
 import AuthAPI from "../../api/Auth";
 import { useEffect, useState } from "react";
 import { USER_COOKIE_KEY } from "../../constant/constants";
+import { userStore } from "../../stores/userStore";
 
 const Login = () => {
   const [userCookie, setUserCookie] = useCookies([USER_COOKIE_KEY]);
   const [userId, setUserId] = useState("");
   const [password, setPassword] = useState("");
+
+  const { setUserInfo } = userStore();
   const navigate = useNavigate();
 
   useEffect(() => {
     if (userCookie.user) {
-      navigate("/todo");
+      AuthAPI.getUser(userCookie.user).then((resp) => {
+        setUserInfo(resp);
+        navigate("/todo");
+      });
     }
   }, []);
 
