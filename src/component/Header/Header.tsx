@@ -17,10 +17,12 @@ const Header = () => {
 
   const [showCalendar, setShowCalendar] = useState(false);
 
-  const { selectedDate, setSelectedDate, setSelectedUser } = useTodoStore();
+  const { selectedDate, selectedUser, setSelectedDate, setSelectedUser } =
+    useTodoStore();
 
   useEffect(() => {
     if (userCookie.user) {
+      console.log(userCookie.user);
       setSelectedUser(userCookie.user);
     }
   }, [userCookie]);
@@ -58,7 +60,7 @@ const Header = () => {
       />
       <Selector<number>
         placeholder="사용자 선택"
-        defaultValue={userCookie.user}
+        defaultValue={selectedUser}
         options={data || []}
         onChange={onChangeUser}
       />

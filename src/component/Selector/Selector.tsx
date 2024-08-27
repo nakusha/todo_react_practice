@@ -8,7 +8,7 @@ type Option<T> = {
 type Props<T> = {
   options: Option<T>[];
   onChange: (value: T) => void;
-  defaultValue?: string;
+  defaultValue?: T;
   placeholder?: string;
 };
 const Selector = <T,>({
@@ -21,13 +21,13 @@ const Selector = <T,>({
   const [selectedOption, setSelectedOption] = useState<Option<T> | null>(null);
 
   useEffect(() => {
-    if (defaultValue) {
-      const idx = options.findIndex((item) => item.value === defaultValue);
-      if (idx !== -1) {
-        setSelectedOption(options[idx]);
+    if (defaultValue !== undefined) {
+      const option = options.find((item) => item.value === defaultValue);
+      if (option) {
+        setSelectedOption(option);
       }
     }
-  }, [defaultValue]);
+  }, [defaultValue, options]);
 
   const openSelector = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -46,7 +46,7 @@ const Selector = <T,>({
       <S.Selector $selectedOption={selectedOption}>
         {selectedOption ? selectedOption.label : placeholder}
       </S.Selector>
-      {isOpen ? (
+      {isOpen && (
         <S.OptionContainer>
           {options.map((option, index) => (
             <S.Option key={index} onClick={(e) => selectOption(option, e)}>
@@ -54,8 +54,6 @@ const Selector = <T,>({
             </S.Option>
           ))}
         </S.OptionContainer>
-      ) : (
-        <></>
       )}
     </S.SelectContainer>
   );
