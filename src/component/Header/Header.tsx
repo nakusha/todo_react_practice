@@ -11,6 +11,8 @@ import Portal from "../../Portal";
 import Modal from "../../Modal";
 import dayjs from "dayjs";
 import DaySelector from "./features/DaySelector";
+import "react-calendar/dist/Calendar.css";
+import "./calendar.style.css";
 
 const Header = () => {
   const [userCookie] = useCookies([USER_COOKIE_KEY]);
