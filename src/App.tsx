@@ -5,6 +5,7 @@ import Layout from "./Layout/Layout";
 import Login from "./pages/Login/Login";
 import Join from "./pages/Join/Join";
 import { CookiesProvider } from "react-cookie";
+import GlobalStyles from "./styles/gloablStyle";
 
 const queryClient = new QueryClient();
 
@@ -12,6 +13,7 @@ function App() {
   return (
     <CookiesProvider>
       <QueryClientProvider client={queryClient}>
+        <GlobalStyles />
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Login />} />

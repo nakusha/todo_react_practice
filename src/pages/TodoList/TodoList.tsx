@@ -13,6 +13,7 @@ import TodoAPI, { AddTodoItem, TodoItem } from "../../api/Todo";
 import dayjs from "dayjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { USER_COOKIE_KEY } from "../../constant/constants";
+import { useNavigate } from "react-router-dom";
 
 export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
@@ -25,6 +26,12 @@ const TodoList = () => {
   const [showCalendar, setShowCalendar] = useState(false);
 
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (!userCookie.user) {
+      navigate("/");
+    }
+  }, []);
 
   const { data } = useQuery({
     queryKey: ["getTodo", selectedDate],
