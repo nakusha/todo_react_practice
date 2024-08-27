@@ -1,13 +1,24 @@
 import { useNavigate } from "react-router-dom";
 import * as S from "./Login.style";
 import { useCookies } from "react-cookie";
+import AuthAPI from "../../api/Auth";
+import { useEffect, useState } from "react";
+import { USER_COOKIE_KEY } from "../../constant/constants";
 
 const Login = () => {
-  const [userCookie, setUserCookie, removeUserCookie] = useCookies(["user"]);
+  const [userCookie, setUserCookie] = useCookies([USER_COOKIE_KEY]);
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
+  useEffect(() => {
+    if (userCookie.user) {
+      navigate("/todo");
+    }
+  }, []);
+
   const handleSetCookie = (userId: string) => {
-    setUserCookie("user", userId, { path: "/todo" });
+    setUserCookie(USER_COOKIE_KEY, userId.toString());
   };
 
   const onClickSignUp = () => {
@@ -15,21 +26,27 @@ const Login = () => {
   };
 
   const onClickSignIn = () => {
-    handleSetCookie("userId");
-    navigate("/todo");
+    AuthAPI.login({ userid: userId, userpassword: password }).then((resp) => {
+      handleSetCookie(resp.id);
+      navigate("/todo");
+    });
   };
+
   return (
     <S.LoginContainer>
       <S.RowItem>
         <S.RowLeftItem>아이디</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input onChange={(e) => setUserId(e.target.value)} />
         </S.RowRightItem>
       </S.RowItem>
       <S.RowItem>
         <S.RowLeftItem>비밀번호</S.RowLeftItem>
         <S.RowRightItem>
-          <input />
+          <input
+            type="password"
+            onChange={(e) => setPassword(e.target.value)}
+          />
         </S.RowRightItem>
       </S.RowItem>
       <S.RowItem>

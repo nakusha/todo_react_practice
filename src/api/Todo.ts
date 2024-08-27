@@ -19,7 +19,7 @@ const TodoAPI = {
       })
       .catch((e) => console.log(e));
   },
-  getTodos: (user_id: number, date?: string): Promise<TodoItem[]> => {
+  getTodos: (user_id: string, date?: string): Promise<TodoItem[]> => {
     const query = new URLSearchParams();
     query.append("user_id", user_id.toString());
     if (date) {
@@ -38,17 +38,24 @@ const TodoAPI = {
       })
       .catch((e) => console.log(e));
   },
-  deleteTodo: (id: number): Promise<void> => {
+  deleteTodo: (id: number, userId: string): Promise<void> => {
     const query = new URLSearchParams();
     query.append("id", id.toString());
-    query.append("user_id", "3");
+    query.append("user_id", userId);
 
     return AxiosInstance.delete(`/todos?${query.toString()}`);
   },
-  searchTodos: (keyword: string): Promise<TodoItem[]> => {
+  searchTodos: (
+    keyword: string,
+    userId: string,
+    date?: string
+  ): Promise<TodoItem[]> => {
     const query = new URLSearchParams();
     query.append("q", keyword);
-    query.append("user_id", "3");
+    query.append("user_id", userId);
+    if (date) {
+      query.append("date", date);
+    }
     return AxiosInstance.get(`/todos/search?${query.toString()}`)
       .then((resp) => {
         return resp.data;

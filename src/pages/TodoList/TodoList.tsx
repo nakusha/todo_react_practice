@@ -6,17 +6,19 @@ import DaySelector from "./features/DaySelector";
 import Calendar from "react-calendar";
 import Portal from "../../Portal";
 import Modal from "../../Modal";
-
+import { Cookies, useCookies } from "react-cookie";
 import "react-calendar/dist/Calendar.css";
 import "./calendar.style.css";
 import TodoAPI, { AddTodoItem, TodoItem } from "../../api/Todo";
 import dayjs from "dayjs";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { USER_COOKIE_KEY } from "../../constant/constants";
 
 export type DatePiece = Date | null;
 export type SelectedDate = DatePiece | [DatePiece, DatePiece];
 
 const TodoList = () => {
+  const [userCookie] = useCookies([USER_COOKIE_KEY]);
   const [input, setInput] = useState("");
   const [isSearch, setIsSearch] = useState(false);
   const [selectedDate, setSelectedDate] = useState<SelectedDate>(new Date());
@@ -28,16 +30,20 @@ const TodoList = () => {
     queryKey: ["getTodo", selectedDate],
     queryFn: () => {
       return TodoAPI.getTodos(
-        3,
+        userCookie.user,
         dayjs(selectedDate as Date).format("YYYY-MM-DD")
       );
     },
   });
 
   const { data: searchData } = useQuery({
-    queryKey: ["searchTodo", input],
+    queryKey: ["searchTodo", input, selectedDate],
     queryFn: () => {
-      return TodoAPI.searchTodos(input);
+      return TodoAPI.searchTodos(
+        input,
+        userCookie.user,
+        dayjs(selectedDate as Date).format("YYYY-MM-DD")
+      );
     },
     enabled: isSearch && input.length > 0,
   });
@@ -63,7 +69,7 @@ const TodoList = () => {
   });
 
   const deleteTodoMutaion = useMutation({
-    mutationFn: (todoId: number) => TodoAPI.deleteTodo(todoId),
+    mutationFn: (todoId: number) => TodoAPI.deleteTodo(todoId, userCookie.user),
     onSuccess: () => {
       // Invalidate and refetch
       queryClient.invalidateQueries({
@@ -77,7 +83,7 @@ const TodoList = () => {
 
     const todo: AddTodoItem = {
       content: input,
-      user_id: 3,
+      user_id: userCookie.user,
       date: selectedDate as Date,
     };
     addTodoMutaion.mutate(todo);

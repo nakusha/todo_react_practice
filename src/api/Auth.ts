@@ -2,23 +2,30 @@ import { AxiosInstance } from "./api";
 
 type LoginParam = {
   userid: string;
-  password: string;
+  userpassword: string;
 };
-type JoinParam = LoginParam & {
+export type JoinParam = LoginParam & {
+  username: string;
   email: string;
   address1: string;
   address2: string;
   zipcode: string;
 };
+
+type UserInfo = {
+  username: string;
+  id: number;
+};
 const AuthAPI = {
   login: (body: LoginParam) => {
-    return AxiosInstance.post("", body);
+    console.log(body);
+    return AxiosInstance.post("/login", body).then((resp) => resp.data);
   },
   join: (body: JoinParam) => {
-    return AxiosInstance.post("", body);
+    return AxiosInstance.post("/users", body);
   },
-  getUser: () => {
-    return AxiosInstance.get("");
+  getUser: (): Promise<UserInfo[]> => {
+    return AxiosInstance.get("/users");
   },
 };
 

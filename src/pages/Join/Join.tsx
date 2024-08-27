@@ -6,16 +6,8 @@ import Modal from "../../Modal";
 import Portal from "../../Portal";
 
 import { useForm, SubmitHandler } from "react-hook-form";
+import AuthAPI, { JoinParam } from "../../api/Auth";
 
-export type Inputs = {
-  username: string;
-  userid: string;
-  password: string;
-  email: string;
-  address1: string;
-  address2: string;
-  zipcode: string;
-};
 const Join = () => {
   const [showPostSearch, setShowPostSearch] = useState(false);
 
@@ -24,13 +16,12 @@ const Join = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-  } = useForm<Inputs>();
+  } = useForm<JoinParam>();
 
   const navigate = useNavigate();
 
-  const onClickJoin: SubmitHandler<Inputs> = (data) => {
-    console.log(data);
-    navigate("/");
+  const onClickJoin: SubmitHandler<JoinParam> = (data) => {
+    AuthAPI.join(data).then(() => navigate("/"));
   };
 
   const getAddressData = (data: Address) => {
@@ -61,11 +52,13 @@ const Join = () => {
         <S.RowRightItem>
           <input
             type="password"
-            {...register("password", { required: "비밀번호를 입력해주세요" })}
+            {...register("userpassword", {
+              required: "비밀번호를 입력해주세요",
+            })}
           />
         </S.RowRightItem>
       </S.NoMBRowItem>
-      <S.ErrorRow>{errors.password?.message}</S.ErrorRow>
+      <S.ErrorRow>{errors.userpassword?.message}</S.ErrorRow>
       <S.NoMBRowItem>
         <S.RowLeftItem>이름</S.RowLeftItem>
         <S.RowRightItem>
