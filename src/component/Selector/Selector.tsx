@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as S from "./Selector.style";
 
 type Option<T> = {
@@ -19,6 +19,23 @@ const Selector = <T,>({
 }: Props<T>) => {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOption, setSelectedOption] = useState<Option<T> | null>(null);
+  const selectorRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        selectorRef.current &&
+        !selectorRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     if (defaultValue !== undefined) {
@@ -42,7 +59,7 @@ const Selector = <T,>({
   };
 
   return (
-    <S.SelectContainer onClick={openSelector}>
+    <S.SelectContainer ref={selectorRef} onClick={openSelector}>
       <S.Selector $selectedOption={selectedOption}>
         {selectedOption ? selectedOption.label : placeholder}
       </S.Selector>

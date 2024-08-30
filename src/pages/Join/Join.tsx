@@ -21,7 +21,9 @@ const Join = () => {
   const navigate = useNavigate();
 
   const onClickJoin: SubmitHandler<JoinParam> = (data) => {
-    AuthAPI.join(data).then(() => navigate("/"));
+    AuthAPI.join(data)
+      .then(() => navigate("/"))
+      .catch(() => alert("실패"));
   };
 
   const getAddressData = (data: Address) => {
@@ -52,13 +54,13 @@ const Join = () => {
         <S.RowRightItem>
           <input
             type="password"
-            {...register("userpassword", {
+            {...register("password", {
               required: "비밀번호를 입력해주세요",
             })}
           />
         </S.RowRightItem>
       </S.NoMBRowItem>
-      <S.ErrorRow>{errors.userpassword?.message}</S.ErrorRow>
+      <S.ErrorRow>{errors.password?.message}</S.ErrorRow>
       <S.NoMBRowItem>
         <S.RowLeftItem>이름</S.RowLeftItem>
         <S.RowRightItem>

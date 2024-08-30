@@ -5,6 +5,11 @@ type LoginParam = {
   userpassword: string;
 };
 
+type JoinInfo = {
+  userid: string;
+  password: string;
+};
+
 export type UserInfoParam = {
   username: string;
   email: string;
@@ -13,7 +18,7 @@ export type UserInfoParam = {
   zipcode: string;
 };
 
-export type JoinParam = LoginParam & UserInfoParam;
+export type JoinParam = JoinInfo & UserInfoParam;
 
 export type UserInfo = {
   username: string;
@@ -21,7 +26,9 @@ export type UserInfo = {
 };
 const AuthAPI = {
   login: (body: LoginParam) => {
-    return AxiosInstance.post("/login", body).then((resp) => resp.data);
+    return AxiosInstance.post("/login", body)
+      .then((resp) => resp.data)
+      .catch(() => {});
   },
   join: (body: JoinParam) => {
     return AxiosInstance.post("/users", body).then((resp) => resp.data);
